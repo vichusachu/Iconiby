@@ -588,9 +588,24 @@ class BatteryStyleManager(context: Context) : ModPack(context) {
                     }
 
                     val mBatteryPercentView =
-                        view.getFieldSilently("mBatteryPercentView") as? TextView
-                    mBatteryPercentView?.visibility =
-                        if (mHidePercentage) View.GONE else View.VISIBLE
+    view.getFieldSilently("mBatteryPercentView") as? TextView
+
+mBatteryPercentView?.let { percentView ->
+    // show / hide percentage
+    percentView.visibility =
+        if (mHidePercentage) View.GONE else View.VISIBLE
+
+    // add 1dp bottom margin
+    val bottomMarginPx =
+        (1 * percentView.resources.displayMetrics.density).toInt()
+
+    val params = percentView.layoutParams
+    if (params is ViewGroup.MarginLayoutParams) {
+        params.bottomMargin = bottomMarginPx
+        percentView.layoutParams = params
+    }
+}
+
 
                     scaleBatteryMeterViews(view)
                     updateChargingIconView(view, mCharging)
