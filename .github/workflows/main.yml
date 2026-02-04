@@ -1,0 +1,40 @@
+name: Build Standard Release APK (beta-pre16)
+
+on:
+  push:
+    branches:
+      - beta-pre16
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout beta-pre16 branch
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          ref: beta-pre16
+
+      # Setup Java (Iconify works with JDK 17)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # Grant Gradle permissions
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      # Build STANDARD flavor RELEASE APK (unsigned)
+      - name: Build standardRelease APK
+        run: ./gradlew assembleStandardRelease
+
+      # Upload the correct APK output
+      - name: Upload standard release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Iconify-standard-release-apk
+          path: app/build/outputs/apk/standard/release/*.apk
