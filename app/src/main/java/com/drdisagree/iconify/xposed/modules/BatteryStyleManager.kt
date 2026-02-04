@@ -597,7 +597,7 @@ mBatteryPercentView?.let { percentView ->
 
     // add 1dp bottom margin
     val bottomMarginPx =
-        (1 * percentView.resources.displayMetrics.density).toInt()
+        (2 * percentView.resources.displayMetrics.density).toInt()
 
     val params = percentView.layoutParams
     if (params is ViewGroup.MarginLayoutParams) {
