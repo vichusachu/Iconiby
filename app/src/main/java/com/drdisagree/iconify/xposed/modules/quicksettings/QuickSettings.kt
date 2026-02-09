@@ -716,39 +716,65 @@ class QuickSettings(context: Context) : ModPack(context) {
     }
 
     private fun compactMediaPlayer() {
-        val mediaViewControllerClass =
-            findClass(
-                "$SYSTEMUI_PACKAGE.media.controls.ui.controller.MediaViewController",
-                "$SYSTEMUI_PACKAGE.media.controls.ui.MediaViewController"
-            )
+    val mediaControlPanelClass = findClass(
+        "$SYSTEMUI_PACKAGE.media.controls.ui.controller.MediaControlPanel",
+        "$SYSTEMUI_PACKAGE.media.controls.ui.MediaControlPanel",
+        "$SYSTEMUI_PACKAGE.media.MediaControlPanel"
+    )
 
-        mediaViewControllerClass
-            .hookMethod("obtainViewState")
-            .runBefore { param ->
-                if (!compactMediaPlayerEnabled) return@runBefore
+    val mediaViewControllerClass =
+        findClass(
+            "$SYSTEMUI_PACKAGE.media.controls.ui.controller.MediaViewController",
+            "$SYSTEMUI_PACKAGE.media.controls.ui.MediaViewController"
+        )
 
-                val mediaHostState = param.args[0] ?: return@runBefore
+    // Keep compact height
+    mediaViewControllerClass
+        .hookMethod("obtainViewState")
+        .runBefore { param ->
+            if (!compactMediaPlayerEnabled) return@runBefore
 
-                // For a14 and above
-                mediaHostState.javaClass
-                    .hookMethod("getExpansion")
-                    .suppressError()
-                    .runBefore runBefore2@{ param2 ->
-                        if (!compactMediaPlayerEnabled) return@runBefore2
+            val mediaHostState = param.args[0] ?: return@runBefore
 
-                        param2.result = 0.15f
-                    }
+            mediaHostState.javaClass
+                .hookMethod("getExpansion")
+                .suppressError()
+                .runBefore {
+                    it.result = 0f
+                }
 
-                // For some a13 and below ROMs
-                mediaHostState.javaClass
-                    .hookConstructor()
-                    .runAfter { param2 ->
-                        if (!compactMediaPlayerEnabled) return@runAfter
+            mediaHostState.javaClass
+                .hookConstructor()
+                .runAfter {
+                    it.thisObject.setFieldSilently("expansion", 0f)
+                }
+        }
 
-                        param2.thisObject.setFieldSilently("expansion", 0f)
-                    }
-            }
-    }
+    // 🔥 Hide icons ONLY in compact mode
+    mediaControlPanelClass
+        .hookMethod("onFinishInflate")
+        .runAfter { param ->
+            if (!compactMediaPlayerEnabled) return@runAfter
+
+            val panel = param.thisObject
+
+            panel.getFieldSilently("mAppIcon")
+                ?.let { (it as View).visibility = View.GONE }
+
+            panel.getFieldSilently("mIcon")
+                ?.let { (it as View).visibility = View.GONE }
+
+            panel.getFieldSilently("mOutputSwitcher")
+                ?.let { (it as View).visibility = View.GONE }
+
+            panel.getFieldSilently("mSeamlessButton")
+                ?.let { (it as View).visibility = View.GONE }
+
+            panel.getFieldSilently("mHeader")
+                ?.let { (it as View).visibility = View.GONE }
+        }
+}
+
 
     private fun blurMediaPlayerArtwork() {
         val mediaControlPanelClass = findClass(
