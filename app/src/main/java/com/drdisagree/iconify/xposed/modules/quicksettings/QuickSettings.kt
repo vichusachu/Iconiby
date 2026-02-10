@@ -736,7 +736,7 @@ class QuickSettings(context: Context) : ModPack(context) {
                     .runBefore runBefore2@{ param2 ->
                         if (!compactMediaPlayerEnabled) return@runBefore2
 
-                        param2.result = 0f
+                        param2.result = 1f
                     }
 
                 // For some a13 and below ROMs
