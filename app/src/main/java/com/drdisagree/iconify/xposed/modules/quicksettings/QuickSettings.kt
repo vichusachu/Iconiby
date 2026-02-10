@@ -736,7 +736,7 @@ class QuickSettings(context: Context) : ModPack(context) {
                     .runBefore runBefore2@{ param2 ->
                         if (!compactMediaPlayerEnabled) return@runBefore2
 
-                        param2.result = 0.1f
+                        param2.result = 0f
                     }
 
                 // For some a13 and below ROMs
@@ -748,6 +748,28 @@ class QuickSettings(context: Context) : ModPack(context) {
                         param2.thisObject.setFieldSilently("expansion", 0f)
                     }
             }
+            val mediaControlPanelClass = findClass(
+    "$SYSTEMUI_PACKAGE.media.controls.ui.MediaControlPanel"
+)
+
+mediaControlPanelClass
+    .hookMethod("bind")
+    .runAfter { param ->
+        if (!compactMediaPlayerEnabled) return@runAfter
+
+        val panel = param.thisObject
+        val root = panel.getFieldSilently("mView") as? ViewGroup
+            ?: return@runAfter
+
+        // 🔧 add vertical breathing space safely
+        root.setPadding(
+            root.paddingLeft,
+            root.paddingTop + 24,
+            root.paddingRight,
+            root.paddingBottom + 24
+        )
+    }
+
     }
 
     private fun blurMediaPlayerArtwork() {
