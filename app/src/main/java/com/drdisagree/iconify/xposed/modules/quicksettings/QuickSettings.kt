@@ -749,33 +749,6 @@ class QuickSettings(context: Context) : ModPack(context) {
                     it.thisObject.setFieldSilently("expansion", 0f)
                 }
         }
-val mediaViewHolderClass = findClass(
-    "$SYSTEMUI_PACKAGE.media.controls.ui.view.MediaViewHolder",
-    "$SYSTEMUI_PACKAGE.media.controls.ui.MediaViewHolder"
-)
-
-mediaViewHolderClass
-    .hookConstructor()
-    .runAfter { param ->
-        if (!compactMediaPlayerEnabled) return@runAfter
-
-        val root = param.thisObject.getFieldSilently("itemView") as? ViewGroup
-            ?: return@runAfter
-
-        val res = root.context.resources
-        val pkg = SYSTEMUI_PACKAGE
-
-        listOf(
-            "icon",                   // app icon
-            "media_output_switcher",  // output device
-            "media_header"            // whole top header
-        ).forEach { name ->
-            val id = res.getIdentifier(name, "id", pkg)
-            if (id != 0) {
-                root.findViewById<View>(id)?.visibility = View.GONE
-            }
-        }
-    }
 
      val mediaViewHolderClass = findClass(
     "$SYSTEMUI_PACKAGE.media.controls.ui.view.MediaViewHolder",
