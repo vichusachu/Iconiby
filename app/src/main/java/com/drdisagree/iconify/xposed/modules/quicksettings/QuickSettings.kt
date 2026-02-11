@@ -764,9 +764,9 @@ mediaControlPanelClass
         // 🔧 add vertical breathing space safely
         root.setPadding(
             root.paddingLeft,
-            root.paddingTop + 24,
+            root.paddingTop + 56,
             root.paddingRight,
-            root.paddingBottom + 24
+            root.paddingBottom + 90
         )
     }
 
